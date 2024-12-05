@@ -14,36 +14,41 @@ export default function LoginPage() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-
+  
     // Validate email and password
     if (password.length < 6) {
       setMessage("Password must be at least 6 characters long.");
       return;
     }
-
+  
     setMessage("");
     setLoading(true);
-
+  
     try {
       const response = await axios.post(
         "http://localhost:5001/users/login",
         { email, password },
         { withCredentials: true }
       );
-
-      const token = response.data.token; // Adjust based on your API response
+  
+      const { token, role } = response.data; // Extract token and role from API response
+  
+      // Save token and role in localStorage
       localStorage.setItem("jwtToken", token);
+      localStorage.setItem("userRole", role);
+      localStorage.setItem("userEmail", email);
+  
       setMessage("Login successful!");
       setUser(response.data.user); // If your backend sends user details
       setLoading(false);
       setRedirect(true); // Trigger navigation after successful login
     } catch (error) {
       setLoading(false);
-
+  
       if (error.response) {
         // Backend sent a specific error response
         const errorMessage = error.response.data.message;
-
+  
         if (errorMessage === "Invalid password") {
           setMessage("Incorrect password. Please try again.");
         } else if (errorMessage === "User not found") {
@@ -57,6 +62,7 @@ export default function LoginPage() {
       }
     }
   };
+  
 
   if (redirect) {
     return <Navigate to="/" />;
