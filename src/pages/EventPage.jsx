@@ -112,6 +112,8 @@ export default function EventPage() {
       alert(response.data.message || "Event deleted successfully!");
 
       // Remove the deleted event from the state
+      // Refresh the events list
+      const events = await axios.get("http://localhost:5001/events");
       setEvents(events.filter((event) => event._id !== eventId));
     } catch (error) {
       console.error("Error deleting event:", error.response?.data || error.message);

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 import { Link } from "react-router-dom";
@@ -9,7 +9,7 @@ export default function Header() {
   const [events, setEvents] = useState([]);
   const navigate = useNavigate();
 
-  //! Fetch events from the server -------------------------------------------------
+  // Fetch events from the server
   useEffect(() => {
     axios.get("/events").then((response) => {
       setEvents(response.data);
@@ -18,12 +18,10 @@ export default function Header() {
     });
   }, []);
 
-  // Logout Functiioanlity
-
+  // Logout functionality
   const handleLogout = async () => {
     try {
       const response = await axios.post("http://localhost:5001/users/logout");
-
       if (response.status === 200) {
         localStorage.clear();
         setUser(null);
@@ -34,7 +32,10 @@ export default function Header() {
     } catch (error) {
       console.error("Logout failed:", error);
     }
-  }
+  };
+
+  // Check user role from localStorage
+  const userRole = localStorage.getItem("userRole"); // Assuming role is stored in localStorage after login
 
   return (
     <div>
@@ -46,26 +47,28 @@ export default function Header() {
 
         {/* Menu and account options on the right */}
         <div className="flex items-center gap-6">
-          {/* Create Event Button */}
-          <Link to="/createEvent">
-            <div className="flex flex-col items-center py-1 px-2 rounded text-primary cursor-pointer hover:text-primary-dark hover:bg-white hover:shadow-sm shadow-gray-200 transition-shadow duration-150">
-              <button className="flex items-center justify-center">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="w-5 h-5 stroke-3 text-primary hover:text-primary-dark"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                </svg>
-              </button>
-              <div className="font-bold text-sm text-primary hover:text-primary-dark">
-                Create Event
+          {/* Show Create Event Button only if user role is 'admin' */}
+          {userRole === "admin" && (
+            <Link to="/createEvent">
+              <div className="flex flex-col items-center py-1 px-2 rounded text-primary cursor-pointer hover:text-primary-dark hover:bg-white hover:shadow-sm shadow-gray-200 transition-shadow duration-150">
+                <button className="flex items-center justify-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="w-5 h-5 stroke-3 text-primary hover:text-primary-dark"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                  </svg>
+                </button>
+                <div className="font-bold text-sm text-primary hover:text-primary-dark">
+                  Create Event
+                </div>
               </div>
-            </div>
-          </Link>
+            </Link>
+          )}
 
           {/* Events */}
           <Link to="/event">
@@ -112,11 +115,13 @@ export default function Header() {
             </div>
           </Link>
 
-          {/* Account or Login */}
-          <Link to="/useraccount">
-            <button className="primary px-4 py-2 bg-primary text-white rounded">Account</button>
-          </Link>
-    
+          {/* Show Account Button only if user is not signed in */}
+          {user ? null : (
+            <Link to="/useraccount">
+              <button className="primary px-4 py-2 bg-primary text-white rounded">Account</button>
+            </Link>
+          )}
+
           <button
             onClick={handleLogout}
             className="flex items-center gap-2 text-red-500 hover:bg-red-100 rounded px-3 py-2"
@@ -145,6 +150,5 @@ export default function Header() {
         </div>
       </header>
     </div>
-
   );
 }
